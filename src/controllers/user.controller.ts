@@ -1,37 +1,34 @@
-import { Controller, Get, Post, Body, HttpException, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UserService } from '../services/user.service';
-import { User } from '@prisma/client';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard'; // Import the JwtAuthGuard
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { CreateUserDto, UserResponseDto } from '../dto';
 
-
-@Controller('api/users')
+@ApiTags('users')
+@ApiBearerAuth()
+@Controller('users')
 @UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  async createUser(@Body() user: User) {
-    try {
-      const newUser = await this.userService.createUser(user);
-      return { success: true, user: newUser };
-    } catch (error) {
-      // Handle service errors
-      throw new HttpException('Failed to create user', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+  @ApiOperation({ summary: 'Create a new user' })
+  @ApiResponse({ status: 201, description: 'User created successfully' })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async createUser(@Body() createUserDto: CreateUserDto): Promise<{ success: boolean; user: UserResponseDto }> {
+    const newUser = await this.userService.createUser(createUserDto);
+    const { password, ...userResponse } = newUser;
+    return { success: true, user: userResponse };
   }
 
   @Get()
-  async findAllUsers() {
-    try {
-      const users = await this.userService.findAllUsers();
-      return { success: true, users };
-    } catch (error) {
-      // Handle service errors
-      throw new HttpException('Failed to retrieve users', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+  @ApiOperation({ summary: 'Get all users' })
+  @ApiResponse({ status: 200, description: 'List of users' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async findAllUsers(): Promise<{ success: boolean; users: UserResponseDto[] }> {
+    const users = await this.userService.findAllUsers();
+    return { success: true, users };
   }
-
-
 }
 
- 

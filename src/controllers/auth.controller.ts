@@ -1,40 +1,30 @@
-import { Controller, Post,Get, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 import { AuthService } from '../services/auth.service';
-import {  User } from '@prisma/client'; 
+import { SignupDto, LoginDto, AuthResponseDto } from '../dto';
 
-
-@Controller('api/auth')
+@ApiTags('auth')
+@Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('/signup')
-  async signup(@Body() user: User): Promise<string | { message: string }> {
-    try {
-      const token = await this.authService.signup(user);
-      return token;
-    } catch (error:any) {
-      console.log(error);
-      return { message: error.message };
-    }
+  @Post('signup')
+  @ApiOperation({ summary: 'Register a new user' })
+  @ApiResponse({ status: 201, description: 'User registered successfully', type: AuthResponseDto })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 409, description: 'Email already registered' })
+  async signup(@Body() signupDto: SignupDto): Promise<AuthResponseDto> {
+    return this.authService.signup(signupDto);
   }
 
-
-  @Get('/hello')
-  async hello(): Promise<string>{
-    return "Hello asaf";
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Login with email and password' })
+  @ApiResponse({ status: 200, description: 'Login successful', type: AuthResponseDto })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
+  async login(@Body() loginDto: LoginDto): Promise<AuthResponseDto> {
+    return this.authService.login(loginDto);
   }
-
-
-
-  @Post('/login')
-  async login(@Body() credentials: { email: string; password: string }): Promise<string | { message: string }> {
-    try {
-      const token = await this.authService.login(credentials );
-      return token;
-    } catch (error) {
-      return { message: 'Login failed' };
-    }
-  }
-
-
 }

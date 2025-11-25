@@ -1,73 +1,169 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# User Management API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A secure, production-ready REST API for user management built with NestJS, Prisma, and TypeScript.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
 
-## Description
+- User registration and authentication (JWT)
+- Secure password hashing with bcrypt
+- Input validation with class-validator
+- Environment configuration with validation
+- MySQL database with Prisma ORM
+- Docker support for easy deployment
+- Health check endpoint
+- **Swagger/OpenAPI documentation**
+- **Rate limiting protection**
+- **Security headers with Helmet.js**
+- **Structured logging with Winston**
+- **Global exception handling**
+- **Graceful shutdown support**
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Tech Stack
+
+- **Framework**: NestJS 10
+- **Language**: TypeScript 5
+- **Database**: MySQL 8
+- **ORM**: Prisma 5
+- **Authentication**: JWT
+- **Validation**: class-validator, class-transformer
+
+## Prerequisites
+
+- Node.js 18+
+- MySQL 8+ (or Docker)
+- npm or yarn
 
 ## Installation
 
 ```bash
-$ npm install
+# Clone the repository
+git clone https://github.com/asafarviv55/nodejs-user-management.git
+cd nodejs-user-management
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your configuration
+
+# Generate Prisma client
+npm run prisma:generate
+
+# Run database migrations
+npm run prisma:migrate
 ```
 
-## Running the app
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `NODE_ENV` | Environment (development/production/test) | development |
+| `PORT` | Server port | 3001 |
+| `DATABASE_URL` | MySQL connection string | - |
+| `JWT_SECRET` | JWT signing secret (min 32 chars) | - |
+| `JWT_EXPIRES_IN` | JWT expiration time | 10d |
+
+## Running the Application
 
 ```bash
-# development
-$ npm run start
+# Development
+npm run start:dev
 
-# watch mode
-$ npm run start:dev
+# Production
+npm run build
+npm run start:prod
 
-# production mode
-$ npm run start:prod
+# With Docker
+docker-compose up -d
 ```
 
-## Test
+## API Documentation
 
+Interactive API documentation is available at:
+```
+http://localhost:3001/api/docs
+```
+
+## API Endpoints
+
+### Health Check
+- `GET /api/health` - Check API status
+
+### Authentication
+- `POST /api/auth/signup` - Register new user
+- `POST /api/auth/login` - Login and get JWT token
+
+### Users (Protected - requires JWT)
+- `GET /api/users` - Get all users
+- `POST /api/users` - Create new user
+
+## Request Examples
+
+### Signup
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+curl -X POST http://localhost:3001/api/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "securepassword",
+    "username": "johndoe",
+    "roleId": 1
+  }'
 ```
 
-## Support
+### Login
+```bash
+curl -X POST http://localhost:3001/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "securepassword"
+  }'
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Get Users (Protected)
+```bash
+curl http://localhost:3001/api/users \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
 
-## Stay in touch
+## Project Structure
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```
+src/
+├── config/          # Configuration and validation
+├── controllers/     # Route handlers
+├── dto/             # Data Transfer Objects
+├── filters/         # Exception filters
+├── guards/          # Authentication guards
+├── services/        # Business logic
+└── main.ts          # Application entry point
+```
+
+## Security Features
+
+- **Helmet.js**: Sets various HTTP headers for security
+- **Rate Limiting**: Protects against brute-force attacks (100 req/min)
+- **bcrypt**: Secure password hashing with salt rounds
+- **JWT**: Stateless authentication with configurable expiry
+- **Input Validation**: Strict validation with class-validator
+- **CORS**: Configurable cross-origin resource sharing
+
+## Scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm run start:dev` | Start in development mode |
+| `npm run build` | Build for production |
+| `npm run start:prod` | Start production server |
+| `npm run lint` | Run ESLint |
+| `npm run test` | Run unit tests |
+| `npm run test:e2e` | Run e2e tests |
+| `npm run prisma:generate` | Generate Prisma client |
+| `npm run prisma:migrate` | Run database migrations |
+| `npm run prisma:studio` | Open Prisma Studio |
 
 ## License
 
-Nest is [MIT licensed](LICENSE).
+MIT
